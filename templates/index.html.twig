@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Courses</title>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .barre {text-decoration: line-through;}
+    </style>
+</head>
+<body>
+<!-- container container-fluid  -->
+<div class="container">
+    <div class="row"  id="app">
+        <div class="offset-3 col-6">
+            <h1> Liste de courses</h1>
+            <br>
+            <div class="row">
+                <div class="col-6">
+                    <input id="nom" class="form-control" >
+                </div>
+                <div class="col-2">
+                    <button onclick="ajouter()" class="btn btn-success">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <br>
+
+            <table class="table table-striped">
+                <thead>
+                <tr><th>Item</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="mytbody">
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+</div>
+<template id="ligne">
+    <tr
+    >
+        <td>
+
+        </td>
+        <td>
+            <button
+                    onclick="acheter(this)"
+                    class="btn btn-primary">
+                <i class="fa fa-check"></i>
+            </button>
+            &nbsp;
+            <button
+                    onclick="enlever(this)"
+                    class="btn btn-danger del">
+                <i class="fa fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    //----------------------
+    let url='http://localhost/__symfony/projet-courses/public/api/item/';
+    axios.get(url).then( response => {
+        let tableau = response.data;
+        console.log(tableau);
+        for( let item of tableau){
+            let tbody = document.querySelector('#mytbody');
+            let template = document.querySelector('#ligne');
+            let clone = template.content.cloneNode(true);
+            // je met le clone a l'intérieur du tbody
+
+            //  un tableau de selecteur td
+            let td = clone.querySelectorAll("td");
+            td[0].innerHTML = item.name;
+
+            let btn = clone.querySelector('.btn-danger');
+            btn.setAttribute('data-id',item.id);
+            if (item.isBought){
+                let tr =clone.querySelector('tr');
+                tr.setAttribute('class','table-danger');
+            }
+
+            let btn2 = clone.querySelector('.btn-primary');
+            btn2.setAttribute('data-id',item.id);
+            tbody.appendChild(clone);
+        }
+    });
+    ///----------------------------------------------------------------
+    function ajouter(){
+
+        // lire la balise input
+        let nom = document.getElementById('nom').value;
+        document.getElementById('nom').value='';
+
+        let body ={ name:nom};
+
+        //data = data.toUpperCase();
+        axios.post(url,body).then( response => {
+            console.log(response.data);
+            // recharge la page !
+            location.reload();
+
+
+        })
+
+        // affiche ds la div #demo
+        //document.getElementById('demo').innerHTML = nom;
+    }
+    //----------------------------------------------------------------------------
+    function enlever(btn) {
+        let id = btn.getAttribute('data-id');
+        console.log(id);
+        let url2 = url + id;
+
+        axios.delete(url2).then(response => {
+            btn.parentElement.parentElement.remove();
+        });
+    }
+    //----------------------------------------------------------------------------
+    function acheter(btn){
+        let id = btn.getAttribute('data-id');
+        console.log(id);
+        let url2 = url + id;
+
+        axios.put(url2).then( response => {
+           // reload  page
+            location.reload();
+        });
+}
+
+
+</script>
+</body>
+</html>
+
