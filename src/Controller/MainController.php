@@ -15,4 +15,12 @@ class MainController extends AbstractController
     {
         return $this->render('index.html.twig');
     }
+
+    /**
+     * @Route("/vuejs", name="vuejs")
+     */
+    public function vuejs(): Response
+    {
+        return $this->render('vuejs.html.twig');
+    }
 }

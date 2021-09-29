@@ -14,17 +14,18 @@
 </head>
 <body>
 <!-- container container-fluid  -->
-<div class="container">
-    <div class="row"  id="app">
+{% verbatim %}
+<div class="container" id="liste">
+    <div class="row"  >
         <div class="offset-3 col-6">
-            <h1> Liste de courses</h1>
+            <h1> Liste de courses VueJS</h1>
             <br>
             <div class="row">
                 <div class="col-6">
-                    <input id="nom" class="form-control" >
+                    <input v-model="nom" class="form-control" >
                 </div>
                 <div class="col-2">
-                    <button onclick="ajouter()" class="btn btn-success">
+                    <button @click="ajouter()" class="btn btn-success">
                         <i class="fa fa-plus"></i>
                     </button>
                 </div>
@@ -37,8 +38,29 @@
                     <th>Action</th>
                 </tr>
                 </thead>
-                <tbody id="mytbody">
+                <tbody>
 
+         <tr
+         v-for="(item,i) in tableau"
+         :class="{'table-danger': item.isBought}"
+         >
+        <td>
+            {{ item.name }}
+        </td>
+        <td>
+            <button
+                    @click="acheter(i)"
+                    class="btn btn-primary">
+                <i class="fa fa-check"></i>
+            </button>
+            &nbsp;
+            <button
+                    @click="enlever(i)"
+                    class="btn btn-danger del">
+                <i class="fa fa-trash"></i>
+            </button>
+        </td>
+    </tr>
                 </tbody>
             </table>
 
@@ -46,31 +68,53 @@
 
     </div>
 </div>
+{% endverbatim %}
 <template id="ligne">
-    <tr
-    >
-        <td>
 
-        </td>
-        <td>
-            <button
-                    onclick="acheter(this)"
-                    class="btn btn-primary">
-                <i class="fa fa-check"></i>
-            </button>
-            &nbsp;
-            <button
-                    onclick="enlever(this)"
-                    class="btn btn-danger del">
-                <i class="fa fa-trash"></i>
-            </button>
-        </td>
-    </tr>
 </template>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script>
     //----------------------
     let url='http://localhost/__symfony/projet-courses/public/api/item/';
+    const app = new Vue({
+        el:'#liste',
+        data:{
+            url:'http://localhost/__symfony/projet-courses/public/api/item/',
+            tableau:[],
+            nom:'',
+        },
+        methods:{
+            ajouter() {
+                let item = {name: this.nom};
+                this.nom = '';
+                axios.post(this.url, item).then(response => {
+                    this.tableau.push(response.data);
+                });
+            },
+            enlever(i){
+                let id = this.tableau[i].id;
+                let url2 = this.url + id;
+                axios.delete(url2).then(response =>{
+                   this.tableau.splice(i,1);
+                });
+            },
+            acheter(i){
+                let id = this.tableau[i].id;
+                let url2 = this.url + id;
+                axios.put(url2).then(response =>{
+                    this.tableau[i].isBought = response.data.isBought;
+                });
+            }
+        },
+        mounted : function(){
+            //console.log('start');
+            axios.get(this.url).then( response => {
+                this.tableau = response.data;
+            });
+        }
+    });
+   /*
     axios.get(url).then( response => {
         let tableau = response.data;
         console.log(tableau);
@@ -138,7 +182,7 @@
             location.reload();
         });
 }
-
+*/
 
 </script>
 </body>
